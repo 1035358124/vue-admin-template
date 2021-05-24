@@ -14,7 +14,10 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import 'viewerjs/dist/viewer.css'
+import Viewer from 'v-viewer'
 
+Vue.use(Viewer)
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

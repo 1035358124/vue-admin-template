@@ -6,45 +6,133 @@
 
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
-        <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
-        </div>
+        <span class="el-dropdown-link" style="cursor: pointer;">
+          下拉菜单<i class="el-icon-arrow-down el-icon--right" />
+        </span>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
-            <el-dropdown-item>
-              Home
+            <el-dropdown-item divided @click.native="showDialog">
+              修改公司展示资料
             </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+
+    <dialog-out
+      v-model="dialogVisible"
+      :dialog-data="dialogData"
+      @dialogBtnClick="dialogBtnClick"
+      @dialogOpen="dialogOpen"
+    >
+      <dialog-form
+        ref="infoForm"
+        :search-form-datas="dialogFormData"
+        :search-form="formData"
+        :rule="formRule"
+      />
+    </dialog-out>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import dialogForm from '@/components/Form/form'
+import dialogOut from '@/components/Dialog/index'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-
+import { getInfo, updateInfo } from '@/api/info'
 export default {
   components: {
     Breadcrumb,
-    Hamburger
+    Hamburger,
+    dialogForm,
+    dialogOut
+  },
+  data() {
+    return {
+      dialogVisible: false,
+      dialogData: {
+        headTitle: '修改公司展示资料',
+        footButton: [{
+          name: '确定',
+          type: 'primary'
+        },
+        {
+          name: '取消'
+        }]
+      },
+      dialogFormData: [
+        {
+          label: '邮箱地址',
+          type: 'input',
+          prop: 'emailAddress'
+        }, {
+          label: '联系人',
+          type: 'input',
+          prop: 'contact'
+        },
+        {
+          label: '电话',
+          type: 'input',
+          prop: 'telephone'
+        },
+        {
+          label: '传真',
+          type: 'input',
+          prop: 'fax'
+        },
+        {
+          label: '地址',
+          type: 'input',
+          prop: 'address'
+        },
+        {
+          label: '权限信息',
+          type: 'input',
+          prop: 'rightsInfo'
+        },
+        {
+          label: '备案号',
+          type: 'input',
+          prop: 'recordNumber'
+        }, {
+          label: '介绍',
+          type: 'textarea',
+          prop: 'introduce',
+          maxlength: 1000,
+          rows: 8
+        }
+      ],
+      formData: {},
+      formRule: {
+        emailAddress: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ],
+        contact: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ], telephone: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ], fax: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ], address: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ], rightsInfo: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ], recordNumber: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ], introduce: [
+          { required: true, message: '请输入组名称', trigger: 'blur' }
+        ]
+      }
+    }
   },
   computed: {
     ...mapGetters([
-      'sidebar',
-      'avatar'
+      'sidebar'
     ])
   },
   methods: {
@@ -54,6 +142,31 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    showDialog() {
+      this.dialogVisible = true
+    },
+    dialogBtnClick(name) {
+      const methods = {
+        '确定': () => {
+          if (this.$refs.infoForm.validateForm()) {
+            updateInfo(this.formData).then(() => {
+              this.$message(
+                { message: '修改成功',
+                  type: 'success' }
+              )
+              this.dialogVisible = false
+            })
+          }
+        },
+        '取消': () => { this.dialogVisible = false }
+      }
+      methods[name]()
+    },
+    async dialogOpen() {
+      await getInfo().then(response => {
+        this.formData = response.data
+      })
     }
   }
 }
@@ -87,6 +200,7 @@ export default {
   .right-menu {
     float: right;
     height: 100%;
+    margin-right:10px;
     line-height: 50px;
 
     &:focus {

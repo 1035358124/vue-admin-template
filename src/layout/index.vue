@@ -64,6 +64,13 @@ export default {
       top: 0;
     }
   }
+  .main-container{
+    height: 100%;
+    .app-main{
+      padding: 20px;
+      height: calc(100% - 50px);
+    }
+  }
   .drawer-bg {
     background: #000;
     opacity: 0.3;
